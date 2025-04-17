@@ -20,16 +20,35 @@ db.once('open', () => {
 })
 
 const exphbs = require('express-handlebars')
+const bodyParser = require('body-parser')
 const Todo = require('./models/todo')
 
 app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs'}))
 app.set('view engine', 'hbs')
+
+app.use(bodyParser.urlencoded({ extended: true }))
 
 app.get('/', (req, res) => {
   // 拿到全部的 todo 資料
   Todo.find()
     .lean()
     .then(todos => res.render('index', { todos })) // 將資料傳給 index.hbs
+    .catch(error => console.log(error))
+})
+
+app.get('/todos/new', (req, res) => {
+  return res.render('new')
+})
+
+app.post('/todos', (req, res) => {
+  const name = req.body.name
+  // const todo = new Todo({ name })
+
+  // return todo.save()
+  //   .then(() => res.redirect('/'))
+  //   .catch(error => console.log(error))
+  return Todo.create({ name })
+    .then(() => res.redirect('/'))
     .catch(error => console.log(error))
 })
 
